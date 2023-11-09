@@ -31,6 +31,14 @@ export default function Home() {
       showError("You must lock your password first");
       return;
     }
+    if (form.envName === "") {
+      showError("You must enter a env name");
+      return;
+    }
+    if (form.envValue === "") {
+      showError("You must enter a env value");
+      return;
+    }
     // encrypt key using crypto and password
     const cipher = crypto.createCipher("aes-256-cbc", password.password);
     let encrypted = cipher.update(form.envValue, "utf8", "hex");
@@ -69,6 +77,10 @@ export default function Home() {
     element.download = ".env.example";
     document.body.appendChild(element); // Required for this to work in FireFox
     element.click();
+  }
+
+  function delEnv(envName) {
+    setEnvs(envs.filter((env) => Object.keys(env)[0] !== envName));
   }
 
   return (
@@ -131,7 +143,15 @@ export default function Home() {
                 type="text"
                 value={form.envValue}
                 id="envValue"
-                onChange={(e) => setForm({ ...form, envValue: e.target.value })}
+                onChange={(e) => {
+                  // space not allowed
+                  const regex = /^[^\s]*$/;
+                  if (!regex.test(e.target.value)) {
+                    showError("Space not allowed");
+                    return;
+                  }
+                  setForm({ ...form, envValue: e.target.value });
+                }}
                 placeholder="your private key..."
                 className="w-full px-3 py-2 mt-1 text-gray-900 border rounded-lg focus:outline-none focus:ring focus:ring-gray-300"
               />
@@ -162,7 +182,7 @@ export default function Home() {
             envs.map((env, index) => {
               const name = Object.keys(env)[0];
               const value = Object.values(env)[0];
-              return <EnvItem key={name} name={name} value={value} DecryptKey={DecryptKey} />;
+              return <EnvItem key={name} name={name} value={value} DecryptKey={DecryptKey} delEnv={delEnv} />;
             })}
         </div>
       </ContainerCol>
@@ -170,15 +190,15 @@ export default function Home() {
   );
 }
 
-function EnvItem({ name, value, DecryptKey }) {
+function EnvItem({ name, value, DecryptKey, delEnv }) {
   return (
-    <div className="flex flex-row flex-nowrap w-full justify-between items-center border-b-2 border-slate-500 py-2">
-      <h2 className="text-sm font-bold text-gray-900 my-2">{name}</h2>
-      <p id={name} className="text-sm font-bold text-green-900 bg-green-50 my-2 px-2 w-[700px] break-all">
+    <div className="flex flex-row flex-nowrap gap-1 w-full justify-between items-start border-b-2 border-slate-500 py-2">
+      <h2 className="text-sm font-bold text-gray-900 my-2 w-[350px] break-all">{name}</h2>
+      <p id={name} className="text-sm text-center font-bold text-green-900 bg-green-50 my-2 px-2 w-[100%] break-all">
         {value}
       </p>
 
-      <div className="flex flex-row gap-1">
+      <div className="flex flex-row gap-1 w-[100px]">
         {/* copy icon svg, click to value copy to clipboard */}
         <div
           title="Copy to clipboard"
@@ -203,14 +223,21 @@ function EnvItem({ name, value, DecryptKey }) {
           </svg>
         </div>
         {name !== "DECRIPTOR_KEY" && (
-          <button
-            onClick={() => {
-              alert(DecryptKey(value));
-            }}
-            className="p-1 bg-orange-500 rounded-md text-white"
-          >
-            Key
-          </button>
+          <>
+            <button
+              onClick={() => {
+                alert(DecryptKey(value));
+              }}
+              className="p-1 bg-orange-500 rounded-md text-white"
+            >
+              Key
+            </button>
+            <button onClick={()=>{
+              delEnv(name)
+            }} className="p-1 bg-red-500 rounded-md text-white">
+              Del
+            </button>
+          </>
         )}
       </div>
     </div>
