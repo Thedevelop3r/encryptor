@@ -79,6 +79,16 @@ export default function Home() {
     element.click();
   }
 
+  function ExportToJson() {
+    const element = document.createElement("a");
+    const file = new Blob([JSON.stringify(envs)], { type: "text/plain" });
+    // set file extension to .env
+    element.href = URL.createObjectURL(file);
+    element.download = "envs.json";
+    document.body.appendChild(element); // Required for this to work in FireFox
+    element.click();
+  }
+
   function delEnv(envName) {
     setEnvs(envs.filter((env) => Object.keys(env)[0] !== envName));
   }
@@ -168,13 +178,22 @@ export default function Home() {
         </div>
         <h1 className="text-3xl text-center font-bold text-gray-900 my-2">Your Secrets</h1>
         {envs && envs.length > 0 && (
-          <button
-            type="button"
-            onClick={ExportEnvsToDotEnv}
-            className="w-[150px] self-center font-bold px-2 py-2 text-white border bg-slate-700 rounded-lg focus:outline-none focus:ring focus:ring-gray-300"
-          >
-            Export To .env
-          </button>
+          <>
+            <button
+              type="button"
+              onClick={ExportEnvsToDotEnv}
+              className="w-[150px] self-center font-bold px-2 py-2 text-white border bg-slate-700 rounded-lg focus:outline-none focus:ring focus:ring-gray-300"
+            >
+              Export To .env
+            </button>
+            <button
+              type="button"
+              onClick={ExportToJson}
+              className="w-[150px] self-center font-bold px-2 py-2 text-white border bg-slate-700 rounded-lg focus:outline-none focus:ring focus:ring-gray-300"
+            >
+              Export To JSON
+            </button>
+          </>
         )}
         <div className="flex flex-col items-start justify-start bg-white px-4">
           {envs &&
@@ -232,9 +251,12 @@ function EnvItem({ name, value, DecryptKey, delEnv }) {
             >
               Key
             </button>
-            <button onClick={()=>{
-              delEnv(name)
-            }} className="p-1 bg-red-500 rounded-md text-white">
+            <button
+              onClick={() => {
+                delEnv(name);
+              }}
+              className="p-1 bg-red-500 rounded-md text-white"
+            >
               Del
             </button>
           </>
