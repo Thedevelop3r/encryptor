@@ -1,15 +1,25 @@
 # Env Encryptor
 
-
-
 ## Getting Started
 
-First, run the development server:
+For Production
+
+install dependencies
 
 ```bash
+yarn
+```
 
-yarn dev
+build
 
+```bash
+yarn build
+```
+
+production start
+
+```bash
+yarn start
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
